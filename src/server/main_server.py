@@ -3,6 +3,7 @@ from server.udp_broadcaster import run_udp_broadcaster
 from server.tcp_server import run_tcp_server
 from server.game_engine import handle_client
 
+
 def main():
     bind_ip = "0.0.0.0"
     bind_port = 0  # let os choose
@@ -22,6 +23,7 @@ def main():
     except KeyboardInterrupt:
         pass
     stop_flag["stop"] = True
+
 
 if __name__ == "__main__":
     main()

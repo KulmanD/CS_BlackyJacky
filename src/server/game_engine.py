@@ -1,6 +1,6 @@
 from common.net_utils import recv_exact
-from common.constants import payload_len, request_len
-from common.protocol import unpack_request, pack_payload, unpack_payload
+from common.constants import request_len, client_payload_len
+from common.protocol import unpack_request, pack_server_payload, unpack_client_payload
 from common.cards import deck, hand, encode_card
 
 # result codes (from pdf)
@@ -44,34 +44,29 @@ def play_one_round(conn):
     dealer.add(d.draw())
     dealer.add(d.draw())
 
-    # send initial state to client using payload packets (simple approach: send cards as separate payloads)
-    # decision field ignored by client on server->client packets, so just send b"-----"
-    dummy_dec = b"-----"
-
     # send player's two cards
     for card in player.items:
-        conn.sendall(pack_payload(dummy_dec, res_not_over, encode_card(card[0], card[1])))
+        conn.sendall(pack_server_payload(res_not_over, encode_card(card[0], card[1])))
 
     # send dealer upcard only
     up = dealer.items[0]
-    conn.sendall(pack_payload(dummy_dec, res_not_over, encode_card(up[0], up[1])))
+    conn.sendall(pack_server_payload(res_not_over, encode_card(up[0], up[1])))
 
     # player turn
     while True:
         if player.is_bust():
-            conn.sendall(pack_payload(dummy_dec, res_loss, b"\x00\x00\x00"))
+            conn.sendall(pack_server_payload(res_loss, b"\x00\x00\x00"))
             return
 
-        pkt = recv_exact(conn, payload_len)
-        payload = unpack_payload(pkt)
-        if payload is None:
+        pkt = recv_exact(conn, client_payload_len)
+        decision5 = unpack_client_payload(pkt)
+        if decision5 is None:
             raise ConnectionError("bad payload")
 
-        decision5, _, _ = payload
         if decision5 == b"Hittt":
             c = d.draw()
             player.add(c)
-            conn.sendall(pack_payload(dummy_dec, res_not_over, encode_card(c[0], c[1])))
+            conn.sendall(pack_server_payload(res_not_over, encode_card(c[0], c[1])))
             continue
         elif decision5 == b"Stand":
             break
@@ -83,7 +78,7 @@ def play_one_round(conn):
     while dealer.total() < 17 and not dealer.is_bust():
         c = d.draw()
         dealer.add(c)
-        conn.sendall(pack_payload(dummy_dec, res_not_over, encode_card(c[0], c[1])))
+        conn.sendall(pack_server_payload(res_not_over, encode_card(c[0], c[1])))
 
     # final compare
     p = player.total()
@@ -100,4 +95,4 @@ def play_one_round(conn):
     else:
         final = res_tie
 
-    conn.sendall(pack_payload(dummy_dec, final, b"\x00\x00\x00"))
+    conn.sendall(pack_server_payload(final, b"\x00\x00\x00"))

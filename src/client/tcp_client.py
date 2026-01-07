@@ -1,7 +1,7 @@
 import socket
 from common.net_utils import recv_exact
-from common.constants import request_len, payload_len
-from common.protocol import pack_request, pack_payload, unpack_payload
+from common.constants import request_len, server_payload_len
+from common.protocol import pack_request, unpack_server_payload, pack_client_payload
 from common.cards import decode_card, rank_value
 
 # result codes
@@ -43,7 +43,10 @@ def play_one_round(sock: socket.socket):
 
     # get initial 3 cards: player, player, dealer upcard
     for _ in range(3):
-        decision, result, card3 = unpack_payload(recv_exact(sock, payload_len))
+        parsed = unpack_server_payload(recv_exact(sock, server_payload_len))
+        if parsed is None:
+            raise RuntimeError("invalid server payload")
+        result, card3 = parsed
         r, suit = decode_card(card3)
         print(f"card: rank={r} suit={suit}")
 
@@ -54,12 +57,15 @@ def play_one_round(sock: socket.socket):
         d = ask_hit_or_stand()
 
         if d == "hit":
-            sock.sendall(pack_payload(b"Hittt", 0, b"\x00\x00\x00"))
+            sock.sendall(pack_client_payload(b"Hittt"))
         else:
-            sock.sendall(pack_payload(b"Stand", 0, b"\x00\x00\x00"))
+            sock.sendall(pack_client_payload(b"Stand"))
 
         # read server updates until either (a) new card, or (b) final result
-        decision, result, card3 = unpack_payload(recv_exact(sock, payload_len))
+        parsed = unpack_server_payload(recv_exact(sock, server_payload_len))
+        if parsed is None:
+            raise RuntimeError("invalid server payload")
+        result, card3 = parsed
 
         if result in (res_win, res_loss, res_tie):
             return result
