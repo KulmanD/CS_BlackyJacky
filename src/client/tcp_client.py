@@ -67,21 +67,35 @@ def play_one_round(sock):
     while True:
         move = ask_hit_or_stand()
 
+        # if move == "hit":
+        #     # send 'Hittt' (5 bytes)
+        #     sock.sendall(pack_client_payload(b"Hittt"))
+        #
+        #     # wait for card or bust
+        #     data = recv_exact(sock, server_payload_len)
+        #     res, card_bytes = unpack_server_payload(data)
+        #
+        #     # if server says game over (Bust), stop immediately
+        #     if res != RES_NOT_OVER:
+        #         return res
+        #
+        #     # otherwise print new card
+        #     rank, suit = decode_card(card_bytes)
+        #     print(f"[Player] Hit: Rank {rank}, Suit {suit}")
+
         if move == "hit":
-            # send 'Hittt' (5 bytes)
             sock.sendall(pack_client_payload(b"Hittt"))
 
-            # wait for card or bust
             data = recv_exact(sock, server_payload_len)
             res, card_bytes = unpack_server_payload(data)
 
-            # if server says game over (Bust), stop immediately
-            if res != RES_NOT_OVER:
-                return res
+            # Always print the card if it exists, even if we busted
+            if card_bytes != b'\x00\x00\x00':
+                rank, suit = decode_card(card_bytes)
+                print(f"[Player] Hit: Rank {rank}, Suit {suit}")
 
-            # otherwise print new card
-            rank, suit = decode_card(card_bytes)
-            print(f"[Player] Hit: Rank {rank}, Suit {suit}")
+            if res != RES_NOT_OVER:
+                return res  # Game over (Bust)
 
         else:
             # Send 'Stand' (5 bytes)
