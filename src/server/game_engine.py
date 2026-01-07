@@ -1,7 +1,7 @@
-from src.common.net_utils import recv_exact
-from src.common.constants import request_len, client_payload_len
-from src.common.protocol import unpack_request, pack_server_payload, unpack_client_payload
-from src.common.cards import deck, hand, encode_card
+from common.net_utils import recv_exact
+from common.constants import request_len, client_payload_len
+from common.protocol import unpack_request, pack_server_payload, unpack_client_payload
+from common.cards import deck, hand, encode_card
 
 # result codes (from pdf)
 res_not_over = 0x0
@@ -11,7 +11,7 @@ res_win = 0x3
 
 def handle_client(conn, addr):
     try:
-        conn.settimeout(15)
+        conn.settimeout(600)
 
         req = recv_exact(conn, request_len)
         parsed = unpack_request(req)
@@ -25,8 +25,12 @@ def handle_client(conn, addr):
         for _ in range(rounds):
             play_one_round(conn)
 
-    except Exception:
-        pass
+
+    except Exception as e:
+        print(f"CRITICAL SERVER ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+
     finally:
         try:
             conn.close()

@@ -1,32 +1,33 @@
-from udp_listener import listen_for_offer
-from tcp_client import play_session
-from ui import ask_rounds, ask_name
-import time
+from client.udp_listener import listen_for_offer
+from client.tcp_client import play_session
+from client.ui import ask_rounds, ask_name
+
 
 def main():
-    rounds = ask_rounds()
-    name = ask_name()
+    print("--- Client Started ---")
 
-    printed_listening = False
+    # get user info
+    team_name = ask_name()
+    rounds = ask_rounds()
 
     while True:
+        print(f"Listening for offers on UDP port...")
+
+        # wait for a server offer
         offer = listen_for_offer()
+
         if offer is None:
-            if not printed_listening:
-                print("listening for offer...")
-                printed_listening = True
-            time.sleep(0.1)
+            # no offer received in 1 second, loop back and try again
             continue
 
-        printed_listening = False
+        server_ip, server_port, server_name = offer
+        print(f"Received offer from '{server_name}' at {server_ip}")
 
-        ip, port, server_name = offer
-        print(f"got offer from {server_name} at {ip}:{port}")
+        # connect and play
+        play_session(server_ip, server_port, rounds, team_name)
 
-        try:
-            play_session(ip, port, rounds, name)
-        except Exception as e:
-            print(f"session failed: {e}")
+        # After game finishes, loop back to listening
+        print("Game over. Searching for new server...\n")
 
 
 if __name__ == "__main__":

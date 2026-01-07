@@ -1,17 +1,28 @@
 def ask_rounds():
-    r = int(input("how many rounds? "))
-    return max(0, min(255, r))
+    """gets input for number of rounds"""
+    while True:
+        try:
+            val = input("How many rounds do you want to play? ").strip()
+            num = int(val)
+            if num > 0:
+                return num
+            print("Please enter a number > 0")
+        except ValueError:
+            print("That's not a number.")
 
 def ask_name():
-    s = input("team name: ").strip()
-    if s == "":
-        s = "player"
-    return s
+    """gets input for team name"""
+    name = input("Enter your Team Name: ").strip()
+    if not name:
+        return "Team_Client"
+    return name
 
 def ask_hit_or_stand():
+    """loops until user enters 'hit' or 'stand'"""
     while True:
-        s = input("hit or stand? ").strip().lower()
-        if s.startswith("h"):
+        choice = input("Your move? (Hit/Stand): ").strip().lower()
+        if choice.startswith('h'):
             return "hit"
-        if s.startswith("s"):
+        if choice.startswith('s'):
             return "stand"
+        print("Invalid move. Please type 'hit' or 'stand'.")

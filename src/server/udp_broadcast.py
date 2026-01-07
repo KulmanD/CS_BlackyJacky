@@ -1,7 +1,7 @@
 import socket
 import time
-from src.common.constants import udp_offer_port
-from src.common.protocol import pack_offer
+from common.constants import udp_offer_port
+from common.protocol import pack_offer
 
 
 def run_udp_broadcaster(tcp_port: int, server_name: str, stop_flag):
