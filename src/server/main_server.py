@@ -1,7 +1,7 @@
 import threading
-from server.udp_broadcaster import run_udp_broadcaster
-from server.tcp_server import run_tcp_server
-from server.game_engine import handle_client
+from src.server.udp_broadcast import run_udp_broadcaster
+from src.server.tcp_server import run_tcp_server
+from src.server.game_engine import handle_client
 
 
 def main():

@@ -1,6 +1,6 @@
 import socket
-from common.constants import udp_offer_port
-from common.protocol import unpack_offer
+from src.common.constants import udp_offer_port
+from src.common.protocol import unpack_offer
 
 
 def listen_for_offer(timeout_sec: float = 3.0):

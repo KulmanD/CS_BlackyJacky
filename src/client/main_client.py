@@ -1,7 +1,7 @@
-from client.udp_listener import listen_for_offer
-from client.tcp_client import play_session
-from client.ui import ask_rounds, ask_name
-
+from udp_listener import listen_for_offer
+from tcp_client import play_session
+from ui import ask_rounds, ask_name
+import time
 
 def main():
     rounds = ask_rounds()
@@ -15,6 +15,7 @@ def main():
             if not printed_listening:
                 print("listening for offer...")
                 printed_listening = True
+            time.sleep(0.1)
             continue
 
         printed_listening = False

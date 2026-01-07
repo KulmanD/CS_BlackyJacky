@@ -1,8 +1,8 @@
 import struct
 from .constants import (
     magic_cookie, msg_type_offer, msg_type_request, msg_type_payload,
-    name_len, decision_len, card_len
-)
+    name_len, decision_len, card_len)
+
 from .net_utils import pad_name, read_name
 
 def pack_offer(tcp_port: int, server_name: str) -> bytes:

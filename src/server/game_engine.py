@@ -1,7 +1,7 @@
-from common.net_utils import recv_exact
-from common.constants import request_len, client_payload_len
-from common.protocol import unpack_request, pack_server_payload, unpack_client_payload
-from common.cards import deck, hand, encode_card
+from src.common.net_utils import recv_exact
+from src.common.constants import request_len, client_payload_len
+from src.common.protocol import unpack_request, pack_server_payload, unpack_client_payload
+from src.common.cards import deck, hand, encode_card
 
 # result codes (from pdf)
 res_not_over = 0x0
