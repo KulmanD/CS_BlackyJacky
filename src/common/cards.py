@@ -23,6 +23,9 @@ def decode_card(card3: bytes):
     suit = card3[2]
     return rank, suit
 
+def suit_name(suit: int) -> str:
+    return ["Hearts", "Diamonds", "Clubs", "Spades"][suit]
+
 class deck:
     def __init__(self):
         self.cards = []

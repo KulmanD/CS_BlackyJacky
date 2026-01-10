@@ -24,9 +24,9 @@ request_len = 4 + 1 + 1 + name_len
 # payload packets (note: client and server have different structure)
 
 # client -> server payload:
-# magic (4) + type (1) + decision (5)
+# magic (4) + type (1) + decision (5) = 10 bytes
 client_payload_len = 4 + 1 + decision_len
 
 # server -> client payload:
-# magic (4) + type (1) + result (1) + card (3)
+# magic (4) + type (1) + result (1) + card (3) = 9 bytes
 server_payload_len = 4 + 1 + 1 + card_len

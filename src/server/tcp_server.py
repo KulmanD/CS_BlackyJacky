@@ -2,7 +2,7 @@ import socket
 import threading
 
 
-def run_tcp_server(bind_ip: str, bind_port: int, handle_client_fn):
+def  run_tcp_server(bind_ip: str, bind_port: int, handle_client_fn):
     # create tcp server socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
