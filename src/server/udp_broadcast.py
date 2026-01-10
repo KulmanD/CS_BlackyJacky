@@ -10,7 +10,7 @@ def run_udp_broadcaster(tcp_port: int, server_name: str, stop_flag):
     try:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
+        #s.bind(("172.18.16.150", 0)) #TODO: UNCOMMENT TO CONTROL WIFI CARD SELECTION
         while not stop_flag.get("stop", False):
             try:
                 msg = pack_offer(tcp_port, server_name)
@@ -18,6 +18,7 @@ def run_udp_broadcaster(tcp_port: int, server_name: str, stop_flag):
             except Exception:
                 # ignore transient network errors, keep broadcasting
                 pass
+
 
             time.sleep(1.0)
     finally:

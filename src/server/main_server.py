@@ -5,6 +5,7 @@ from server.game_engine import handle_client
 
 
 def main():
+    #bind_ip = "172.18.16.150" # TODO: CHECK IPCONFIG FOR CORRECT IP BECAUSE WSL WIFI CARD HIJACKS TRAFFIC
     bind_ip = "0.0.0.0"
     bind_port = 0  # let os choose
     server_name = "dealer"
