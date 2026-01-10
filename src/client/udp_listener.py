@@ -2,12 +2,11 @@ import socket
 from common.constants import udp_offer_port, offer_len
 from common.protocol import unpack_offer
 
-
+"""
+Listens for a UDP broadcast on port 13122.
+Returns: (server_ip, server_port, server_name) or None if timed out/invalid.
+"""
 def listen_for_offer():
-    """
-    Listens for a UDP broadcast on port 13122.
-    Returns: (server_ip, server_port, server_name) or None if timed out/invalid.
-    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     # allow multiple clients to listen on the same machine
@@ -21,7 +20,7 @@ def listen_for_offer():
         s.settimeout(1.0) # don't block forever, check every second so we can stop the program if needed
 
         try:
-            data, addr = s.recvfrom(1024) # we need at least offer_len bytes
+            data, addr = s.recvfrom(offer_len) # we need at least offer_len bytes
         except socket.timeout:
             return None
         except Exception as e:

@@ -1,5 +1,5 @@
+# gets input for number of rounds
 def ask_rounds():
-    """gets input for number of rounds"""
     while True:
         try:
             val = input("How many rounds do you want to play? ").strip()
@@ -10,15 +10,17 @@ def ask_rounds():
         except ValueError:
             print("That's not a number.")
 
+
+# gets input for team name
 def ask_name():
-    """gets input for team name"""
     name = input("Enter your Team Name: ").strip()
     if not name:
         return "Team_Client"
     return name
 
+
+# loops until user enters 'hit' or 'stand'
 def ask_hit_or_stand():
-    """loops until user enters 'hit' or 'stand'"""
     while True:
         choice = input("Your move? (Hit/Stand): ").strip().lower()
         if choice.startswith('h'):

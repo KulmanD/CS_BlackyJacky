@@ -19,7 +19,7 @@ def  run_tcp_server(bind_ip: str, bind_port: int, handle_client_fn):
             try:
                 conn, addr = s.accept()
             except OSError:
-                # socket closed -> stop thread
+                # socket closed so stop thread
                 break
 
             # handle each client in its own thread
