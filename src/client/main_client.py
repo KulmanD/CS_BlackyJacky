@@ -6,28 +6,27 @@ from client.ui import ask_rounds, ask_name
 def main():
     print("--- Client Started ---")
 
-    # get user info
-    team_name = ask_name()
-    rounds = ask_rounds()
+    try:
+        # get user info
+        team_name = ask_name()
+        rounds = ask_rounds()
 
-    while True:
-        print(f"Listening for offers on UDP port...")
+        while True:
+            print(f"Listening for offers on UDP port...")
+            offer = listen_for_offer() # wait for a server offer
 
-        # wait for a server offer
-        offer = listen_for_offer()
+            if offer is None:
+                continue # no offer received in 1 second, loop back and try again
 
-        if offer is None:
-            # no offer received in 1 second, loop back and try again
-            continue
+            server_ip, server_port, server_name = offer
+            print(f"Received offer from '{server_name}' at {server_ip}")
 
-        server_ip, server_port, server_name = offer
-        print(f"Received offer from '{server_name}' at {server_ip}")
+            play_session(server_ip, server_port, rounds, team_name) # connect and play
 
-        # connect and play
-        play_session(server_ip, server_port, rounds, team_name)
+            print("Game over. Searching for new server...\n") # after game finishes, loop back to listening
 
-        # After game finishes, loop back to listening
-        print("Game over. Searching for new server...\n")
+    except KeyboardInterrupt: # pressed control c
+        print("\n[Client] User requested shutdown. Goodbye!")
 
 
 if __name__ == "__main__":
