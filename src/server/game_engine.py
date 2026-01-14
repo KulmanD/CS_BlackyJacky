@@ -12,8 +12,9 @@ res_win = 0x3
 
 
 def handle_client(conn, addr):
-    # Print IP only once at connection
-    print(f"\nNew connection from {addr[0]}:{addr[1]}")
+    # Initial temporary ID
+    client_id = f"{addr[0]}:{addr[1]}"
+    print(f"\nNew connection from {client_id}. Waiting for protocol handshake...")
 
     try:
         conn.settimeout(600)  # 10 minutes timeout
@@ -21,30 +22,35 @@ def handle_client(conn, addr):
         req = recv_exact(conn, request_len)
         parsed = unpack_request(req)
         if parsed is None:
-            print("Invalid REQUEST packet. Closing.")
+            print(f"[{client_id}] Sent invalid REQUEST packet. closing.")
             conn.close()
             return
 
         rounds, client_name = parsed
-        print(f"Client '{client_name}' identified. Playing {rounds} rounds.\n")
+        # Update ID to include the Team Name
+        client_id = f"{client_name}"
+        print(f"\n[{client_id}] Handshake complete. Wants to play {rounds} rounds.")
 
         for i in range(rounds):
-            play_one_round(conn, client_name)
+            print(f"\n=== Round {i + 1}/{rounds} for {client_id} ===")
+            play_one_round(conn, client_id)
+            print(f"=== Round {i + 1} Finished for {client_id} ===\n")
 
     except ConnectionError:
-        print(f"Client {client_name} , IP {addr[0]} Port: {addr[1]} disconnected.")
+        print(f"[{client_id}] Disconnected abruptly.")
 
     except Exception as e:
-        print(f"Server error: {e}")
+        print(f"[{client_id}] Server Error: {e}")
         traceback.print_exc()
     finally:
         try:
             conn.close()
+            print(f"[{client_id}] Connection closed.")
         except Exception:
             pass
 
 
-def play_one_round(conn, client_name):
+def play_one_round(conn, client_id):
     d = deck()
     player = hand()
     dealer = hand()
@@ -71,12 +77,12 @@ def play_one_round(conn, client_name):
             raise ConnectionError("Client sent bad payload")
 
         if decision5 == b"Hittt":
-            print(f"{client_name} hit.")
             c = d.draw()
             player.add(c)
+            print(f"[{client_id}] ACTION: Hit -> Drew {rank_value(c[0])}. Total: {player.total()}")
 
             if player.is_bust():
-                print(f"{client_name} busted with {player.total()}.")
+                print(f"[{client_id}] RESULT: PLAYER Busted! (Total {player.total()} > 21). Sending LOSS.")
                 conn.sendall(pack_server_payload(res_loss, encode_card(c[0], c[1])))
                 return  # End round
             else:
@@ -84,36 +90,57 @@ def play_one_round(conn, client_name):
             continue
 
         elif decision5 == b"Stand":
-            print(f"{client_name} stands.")
+            print(f"[{client_id}] ACTION: Stand. Final Player Total: {player.total()}")
             break
         else:
+            print(f"[{client_id}] Received unknown command. Stopping round.")
             break
 
     # Dealer Turn
+    # always reveal the hidden card first (round is still not over)
     hidden = dealer.items[1]
-    conn.sendall(pack_server_payload(res_not_over, encode_card(hidden[0], hidden[1])))
+    if dealer.is_bust():
+        conn.sendall(pack_server_payload(res_loss, encode_card(hidden[0], hidden[1])))
+        return
+    if dealer.total() < 17:
+        conn.sendall(pack_server_payload(res_not_over, encode_card(hidden[0], hidden[1])))
 
+    # dealer draws until reaching 17 or more
+    last = encode_card(hidden[0], hidden[1])
     while dealer.total() < 17:
-        print(f"Dealer has {dealer.total()}, drawing...")
+        print(f"[Dealer] has {dealer.total()}, drawing...")
         c = d.draw()
         dealer.add(c)
-        conn.sendall(pack_server_payload(res_not_over, encode_card(c[0], c[1])))
+        print(f"[Dealer] Drew {rank_value(c[0])}. New Total: {dealer.total()}")
 
+        # if dealer busts on this draw, send the busting card with the final WIN result
+        if dealer.is_bust():
+            conn.sendall(pack_server_payload(res_win, encode_card(c[0], c[1])))
+            print(f"[{client_id}] RESULT: PLAYER WIN -- > Dealer Busted with value: {dealer.total()}")
+            return
+
+        # otherwise, keep sending cards as not-over
+        if dealer.total() < 17:
+            conn.sendall(pack_server_payload(res_not_over, encode_card(c[0], c[1])))
+            print(f"Dealer Drew {rank_value(c[0])}. New Total: {dealer.total()}")
+        else :
+            last = encode_card(c[0], c[1])
+    print(f"[Dealer] current score: {dealer.total()}")
     # Final Result
     p = player.total()
     dlr = dealer.total()
 
     if dealer.is_bust():
         final = res_win
-        print(f"Dealer busted. {client_name} wins.")
+        print(f"[{client_id}] RESULT: PLAYER WIN (Dealer Busted)")
     elif p > dlr:
         final = res_win
-        print(f"{client_name} wins ({p} vs {dlr}).")
+        print(f"[{client_id}] RESULT: PLAYER WIN {p} > {dlr}")
     elif p < dlr:
         final = res_loss
-        print(f"Dealer wins ({dlr} vs {p}).")
+        print(f"[{client_id}] RESULT: CLIENT LOSS {p} < {dlr}")
     else:
         final = res_tie
         print(f"Tie ({p} vs {dlr}).")
 
-    conn.sendall(pack_server_payload(final, b"\x00\x00\x00"))
+    conn.sendall(pack_server_payload(final, last))
