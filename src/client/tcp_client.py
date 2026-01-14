@@ -18,10 +18,10 @@ def _card_pretty(rank, suit):
     r = faces.get(rank, str(rank))
 
     suit_symbols = {
-        0: "♥",  # hearts
-        1: "♦",  # diamonds
-        2: "♣",  # clubs
-        3: "♠",  # spades
+        0: " ♥",  # hearts
+        1: " ♦",  # diamonds
+        2: " ♣",  # clubs
+        3: " ♠",  # spades
     }
     s = suit_symbols.get(suit, "?")
 
@@ -33,13 +33,13 @@ def _hand_total(cards):
 
 
 def _banner(text):
-    line = "=" * (len(text) + 8)
-    print(f"\n{line}\n=== {text} ===\n{line}")
+    line = "~" * (len(text) + 15)
+    print(f"\n{line}\n~~~~~~ {text} ~~~~~~~\n{line}")
 
 
 def _say(text):
     # small consistent prefix
-    print(f"card: {text}")
+    print(f"------ {text} ------ ")
 
 
 def play_session(ip, port, rounds, name):
@@ -82,7 +82,7 @@ def play_one_round(sock): # handles the flow of a single round
 
     # phase 1: initial Deal (3 cards)
     # server sends: player card 1 , player card 2 , dealer up card
-    _say("shuffling... dealing initial cards")
+    print(".............shuffling.............")
     player_cards = []
     dealer_cards = []
     try:
@@ -94,7 +94,7 @@ def play_one_round(sock): # handles the flow of a single round
 
             if i == 2:
                 dealer_cards.append((rank, suit))
-                _say(f"dealer shows: {_card_pretty(rank, suit)}")
+                _say(f"dealer shows: {_card_pretty(rank, suit)} (total: {_hand_total(dealer_cards)})")
             else:
                 player_cards.append((rank, suit))
                 _say(f"you get: {_card_pretty(rank, suit)}")
@@ -107,7 +107,6 @@ def play_one_round(sock): # handles the flow of a single round
         print(f"Error getting initial cards: {e}")
         return RES_LOSS
 
-    _say("your move: hit or stand")
 
     # phase 2: player decisions
     while True:

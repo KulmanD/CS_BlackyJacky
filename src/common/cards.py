@@ -12,14 +12,14 @@ def rank_value(rank: int) -> int:
 
 def encode_card(rank: int, suit: int) -> bytes:
     # first 2 bytes rank 01-13 (2 bytes), second byte suit 0-3 (1 byte)
-    rank = max(1, min(13, int(rank)))
-    suit = max(0, min(3, int(suit)))
+    rank = max(1, min(13, int(rank))) #fallback rank between 1-13
+    suit = max(0, min(3, int(suit))) #fallback suit between 0-4
     return rank.to_bytes(2, "big") + bytes([suit])
 
 
 def decode_card(card3: bytes):
-    rank = int.from_bytes(card3[:2], "big")
-    suit = card3[2]
+    rank = int.from_bytes(card3[:2], "big") #first 2 rank
+    suit = card3[2] #last digit is suit
     return rank, suit
 
 
@@ -28,6 +28,7 @@ def suit_name(suit: int) -> str:
 
 
 class deck:
+    #init deck with suffered cards [1-13(rank) ,0-3(suit)]
     def __init__(self):
         self.cards = []
         for suit in suits:

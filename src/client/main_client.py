@@ -21,6 +21,8 @@ def main():
             server_ip, server_port, server_name = offer
             print(f"Received offer from '{server_name}' at {server_ip}")
 
+            #here we create the tcp socket
+            #blocking call, meaning it doesn't return till session end or interrupt
             play_session(server_ip, server_port, rounds, team_name) # connect and play
 
             print("Game over. Searching for new server...\n") # after game finishes, loop back to listening

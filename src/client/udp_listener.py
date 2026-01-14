@@ -1,5 +1,6 @@
 import socket
 from common.constants import udp_offer_port, offer_len
+#expected offer_len = magic(4) + type(1) + tcp_port(2) + server_name(32)
 from common.protocol import unpack_offer
 
 """
@@ -7,6 +8,7 @@ Listens for a UDP broadcast on port 13122.
 Returns: (server_ip, server_port, server_name) or None if timed out/invalid.
 """
 def listen_for_offer():
+
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     # allow multiple clients to listen on the same machine

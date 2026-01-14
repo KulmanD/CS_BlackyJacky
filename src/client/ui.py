@@ -22,7 +22,7 @@ def ask_name():
 # loops until user enters 'hit' or 'stand'
 def ask_hit_or_stand():
     while True:
-        choice = input("Your move? (Hit/Stand): ").strip().lower()
+        choice = input("\nYour move? (Hit/Stand): ").strip().lower()
         if choice.startswith('h'):
             return "hit"
         if choice.startswith('s'):
